@@ -1,0 +1,58 @@
+# Databricks Asset Bundle: `databricks bundle deploy` then `databricks bundle run fraud_job`.
+bundle:
+  name: fraud-lakehouse
+
+variables:
+  catalog:
+    default: workspace
+  schema:
+    default: fraud
+
+targets:
+  dev:
+    mode: development
+    default: true
+
+resources:
+  pipelines:
+    fraud_pipeline:
+      name: fraud-lakehouse-pipeline
+      catalog: ${var.catalog}
+      schema: ${var.schema}
+      serverless: true
+      channel: CURRENT
+      photon: true
+      configuration:
+        bundle.sourcePath: ${workspace.file_path}
+      libraries:
+        - file:
+            path: ./pipeline/fraud_pipeline.py
+
+  jobs:
+    fraud_job:
+      name: fraud-lakehouse-job
+      description: "Ingest PaySim -> Delta pipeline -> governance -> XGBoost/SHAP/MLflow -> A/B simulation -> KPIs and report"
+      schedule:
+        quartz_cron_expression: "0 0 6 ? * MON"
+        timezone_id: Europe/London
+        pause_status: PAUSED
+      tasks:
+        - task_key: setup
+          notebook_task:
+            notebook_path: ./notebooks/01_setup.py
+        - task_key: pipeline
+          depends_on: [{task_key: setup}]
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.fraud_pipeline.id}
+        - task_key: governance
+          depends_on: [{task_key: pipeline}]
+          notebook_task:
+            notebook_path: ./notebooks/02_governance.py
+        - task_key: train_ab
+          depends_on: [{task_key: pipeline}]
+          notebook_task:
+            notebook_path: ./notebooks/03_train_ab.py
+        - task_key: kpis_report
+          depends_on: [{task_key: train_ab}, {task_key: governance}]
+          notebook_task:
+            notebook_path: ./notebooks/04_kpis_report.py

@@ -1,0 +1,18 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install "pyspark==4.0.1" xgboost shap scikit-learn pandas pyarrow scipy openpyxl pytest pyyaml
+      - run: pytest -q
+      - name: Bundle config is valid YAML with the expected job tasks
+        run: python -c "import yaml; d=yaml.safe_load(open('databricks.yml')); assert [t['task_key'] for t in d['resources']['jobs']['fraud_job']['tasks']] == ['setup','pipeline','governance','train_ab','kpis_report']"

@@ -35,7 +35,7 @@ try:   # data-quality results recorded by the pipeline's expectations
 except Exception as e:
     dq = {"unavailable": str(e).split(chr(10))[0][:200]}
 res = json.loads(dbutils.fs.head(f"{C.EXPORT_DIR}/model_ab.json", 10_000_000))
-res.update({"run_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "platform": "Databricks Free Edition",
+res.update({"run_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "platform": "Databricks serverless (trial workspace)",
             "expectation_failures": dq, "data": "PaySim (Kaggle, CC BY-SA 4.0)"})
 
 tmp = Path(tempfile.mkdtemp()) / "results"

@@ -29,6 +29,7 @@ spark.createDataFrame(fit["explained"]).write.mode("overwrite").saveAsTable(f"{S
 
 s = fit["scored"]
 ab = abtest.simulate(s.txn_id, s.score, s.is_fraud, s.amount, fit["threshold"])
-out = {"model": fit["results"], "ab_test": ab, "test_days": int(s.day.nunique()), "gold_rows": len(pdf)}
+out = {"model": fit["results"], "ab_test": ab, "test_days": int(s.day.nunique()), "model_rows": len(pdf),
+       "gold_rows": spark.table(f"{S}.gold_transactions").count()}
 dbutils.fs.put(f"{C.EXPORT_DIR}/model_ab.json", json.dumps(out, indent=2, default=str), overwrite=True)
 print(json.dumps({"full": fit["results"]["full"]["test"], "ab": ab["decision"]}, indent=2))

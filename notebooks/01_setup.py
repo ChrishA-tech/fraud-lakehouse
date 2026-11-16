@@ -24,3 +24,12 @@ files = [f for f in dbutils.fs.ls(C.RAW_DIR) if f.name.endswith(".csv")]
 if not files:
     raise FileNotFoundError(f"No CSV in {C.RAW_DIR}. Upload the PaySim CSV to the 'raw' volume, then re-run.")
 print("Raw files:", [(f.name, round(f.size / 1e6, 1)) for f in files], "MB")
+
+# Data contract: fail fast on a truncated file instead of training on a fraction of the data.
+n = spark.read.option("header", True).csv(C.RAW_DIR).count()
+print(f"Raw rows: {n:,} (expected {C.EXPECTED_RAW_ROWS:,})")
+if n + 1 == C.EXCEL_ROW_LIMIT:
+    raise ValueError(f"The CSV has {n:,} rows: it was cut at Excel's 1,048,576-row limit. Re-download and unzip it "
+                     "in Terminal without opening it in Excel or Numbers.")
+if abs(n - C.EXPECTED_RAW_ROWS) > 0.01 * C.EXPECTED_RAW_ROWS:
+    raise ValueError(f"Expected about {C.EXPECTED_RAW_ROWS:,} rows, found {n:,}: the raw file is incomplete or not PaySim.")

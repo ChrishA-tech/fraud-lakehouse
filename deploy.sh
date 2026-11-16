@@ -13,4 +13,7 @@ WHL=$(ls dist/*.whl)
 databricks fs mkdir dbfs:/Volumes/workspace/fraud/raw/libs
 databricks fs cp --overwrite "$WHL" dbfs:/Volumes/workspace/fraud/raw/libs/
 databricks bundle deploy
+if [ "${FULL_REFRESH:-0}" = "1" ]; then      # reload every raw file (e.g. after replacing the CSV)
+  databricks bundle run fraud_pipeline --full-refresh-all
+fi
 databricks bundle run fraud_job

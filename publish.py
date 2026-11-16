@@ -59,6 +59,10 @@ def results_md(r):
     m, nb, ab = r["model"]["full"]["test"], r["model"]["no_balance_errors"]["test"], r["ab_test"]
     L = [f"Run {r.get('run_at', '')[:10]} on {r.get('platform', 'Databricks')}; test period = last "
          f"{r.get('test_days', '?')} days (never used for training or threshold choice).", "",
+         f"Data: {r.get('gold_rows', 0):,} gold rows; {r.get('model_rows', sum(r['model']['split_sizes'].values())):,} "
+         f"TRANSFER/CASH_OUT rows modelled; time split at step {r['model'].get('split_step_cutoffs', {}).get('train_max_step', '?')} / "
+         f"{r['model'].get('split_step_cutoffs', {}).get('valid_max_step', '?')} (train / validation / test = "
+         + " / ".join(f"{r['model']['split_sizes'].get(k, 0):,}" for k in ("train", "valid", "test")) + ").", "",
          "| Model (test period) | PR-AUC | Precision | Recall | Fraud value stopped | False declines | Net saving |",
          "|---|---|---|---|---|---|---|"]
     for name, t in (("XGBoost, all features", m), ("XGBoost, without balance-error artefact", nb)):
@@ -70,6 +74,9 @@ def results_md(r):
               f"{format(ab['design']['required_n_per_arm'], ',') if ab['design']['required_n_per_arm'] is not None else 'n/a'} transactions per arm needed for a "
               f"{ab['design']['mde']:.0%} effect ({'met' if ab['design']['powered'] else 'not met'}). Decision: "
               f"{ab['decision']}."]
+    L += ["", "PaySim is simulated: balance fields reveal fraud almost perfectly (even without the two balance-error "
+              "features, old/new balances and `orig_emptied` remain). Treat these scores as an upper bound, not an "
+              "estimate for real payments; the GBP figures are PaySim amounts relabelled for illustration."]
     dq = r.get("expectation_failures") or {}
     if dq and "unavailable" not in dq:
         L += ["", "**Data quality (Lakeflow expectations):** " + ", ".join(f"{k} {v:,}" for k, v in dq.items()) + "."]

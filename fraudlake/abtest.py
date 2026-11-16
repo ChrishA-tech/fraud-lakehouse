@@ -58,17 +58,28 @@ def simulate(txn_ids, score, y, amount, thr_control: float, factor: float = C.AB
         flag = s >= thr
         return {"n": int(len(s)), "threshold": round(thr, 4), "mean_cost_gbp": round(float(cost_per_txn(s, yy, aa, thr).mean()), 4),
                 "fraud_value_lost": round(float(aa[~flag & (yy == 1)].sum()), 2),
-                "false_declines": int((flag & (yy == 0)).sum()), "alerts": int(flag.sum())}
+                "false_declines": int((flag & (yy == 0)).sum()), "alerts": int(flag.sum()),
+                "false_decline_rate": round(float((flag & (yy == 0)).sum() / max(int((yy == 0).sum()), 1)), 4)}
     significant = welch.pvalue < C.AB_ALPHA
+    tr = arm_stats(score[arm == 1], y[arm == 1], amount[arm == 1], thr_treat)
+    breached = tr["false_decline_rate"] > C.AB_GUARDRAIL_FD_RATE
+    if breached:
+        decision = (f"reject the stricter rule: it wrongly declines {tr['false_decline_rate']:.1%} of genuine payments "
+                    f"(guardrail {C.AB_GUARDRAIL_FD_RATE:.0%})")
+    elif significant and diff < 0:
+        decision = "ship the stricter rule"
+    elif significant and diff > 0:
+        decision = "keep the current rule (stricter rule costs more)"
+    else:
+        decision = "no significant difference: keep the current rule"
     return {
         "design": {"unit": "transaction (stable hash of txn_id)", "metric": "cost per transaction (GBP)",
                    "mde": C.AB_MDE, "alpha": C.AB_ALPHA, "power": C.AB_POWER, "required_n_per_arm": need,
                    "powered": need is not None and bool(min(len(c), len(t)) >= need), "simulation": True},
         "control": arm_stats(score[arm == 0], y[arm == 0], amount[arm == 0], thr_control),
-        "treatment": arm_stats(score[arm == 1], y[arm == 1], amount[arm == 1], thr_treat),
+        "treatment": tr, "guardrail": {"metric": "false-decline rate on genuine payments",
+                                        "max": C.AB_GUARDRAIL_FD_RATE, "breached": breached},
         "difference_mean_cost_gbp": round(diff, 4), "relative_change": round(diff / c.mean(), 4) if c.mean() else None,
         "ci95": [round(float(lo), 4), round(float(hi), 4)], "welch_t": round(float(welch.statistic), 3),
         "p_value": float(f"{welch.pvalue:.3g}"),
-        "decision": ("ship the stricter rule" if significant and diff < 0 else
-                     "keep the current rule (stricter rule costs more)" if significant and diff > 0 else
-                     "no significant difference: keep the current rule")}
+        "decision": decision}

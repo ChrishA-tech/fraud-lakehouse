@@ -31,7 +31,10 @@ try:   # data-quality results recorded by the pipeline's expectations
       SELECT e.name, sum(e.failed_records) AS failed FROM (
         SELECT explode(from_json(details:flow_progress.data_quality.expectations,
                'array<struct<name:string,dataset:string,passed_records:long,failed_records:long>>')) AS e
-        FROM event_log(TABLE({S}.silver_transactions)) WHERE event_type = 'flow_progress') GROUP BY e.name""").collect()}
+        FROM event_log(TABLE({S}.silver_transactions))
+        WHERE event_type = 'flow_progress' AND origin.update_id = (      -- latest pipeline update only
+          SELECT origin.update_id FROM event_log(TABLE({S}.silver_transactions))
+          WHERE event_type = 'create_update' ORDER BY timestamp DESC LIMIT 1)) GROUP BY e.name""").collect()}
 except Exception as e:
     dq = {"unavailable": str(e).split(chr(10))[0][:200]}
 res = json.loads(dbutils.fs.head(f"{C.EXPORT_DIR}/model_ab.json", 10_000_000))

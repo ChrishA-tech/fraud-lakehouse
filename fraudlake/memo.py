@@ -49,7 +49,8 @@ Transactions were randomly split between the current threshold ({ab['control']['
 (95% CI {_gbp(ab['ci95'][0])} to {_gbp(ab['ci95'][1])}, p = {_p(ab['p_value'])}). The test needed
 {_n(ab['design']['required_n_per_arm'])} transactions per arm to detect a {ab['design']['mde']:.0%} change and
 {'had enough' if ab['design']['powered'] else 'did NOT have enough'}. The stricter rule raised
-{ab['treatment']['false_declines']:,} false declines against {ab['control']['false_declines']:,}.
+{ab['treatment']['false_declines']:,} false declines against {ab['control']['false_declines']:,}
+({ab['treatment'].get('false_decline_rate', 0):.1%} of genuine payments; guardrail {ab.get('guardrail', {}).get('max', 0.01):.0%}).
 
 ## Caveats
 - PaySim is simulated data. Two balance features nearly separate fraud because of how the simulator books it;

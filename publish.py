@@ -72,7 +72,9 @@ def results_md(r):
               f"£{ab['difference_mean_cost_gbp']:+.4f} (95% CI £{ab['ci95'][0]:+.4f} to £{ab['ci95'][1]:+.4f}, "
               f"p {'< 0.001' if ab['p_value'] < 0.001 else '= ' + format(ab['p_value'], '.3f')}); "
               f"{format(ab['design']['required_n_per_arm'], ',') if ab['design']['required_n_per_arm'] is not None else 'n/a'} transactions per arm needed for a "
-              f"{ab['design']['mde']:.0%} effect ({'met' if ab['design']['powered'] else 'not met'}). Decision: "
+              f"{ab['design']['mde']:.0%} effect ({'met' if ab['design']['powered'] else 'not met'}); stricter rule wrongly "
+              f"declined {ab['treatment'].get('false_decline_rate', 0):.1%} of genuine payments (guardrail "
+              f"{ab.get('guardrail', {}).get('max', 0.01):.0%}). Decision: "
               f"{ab['decision']}."]
     L += ["", "PaySim is simulated: balance fields reveal fraud almost perfectly (even without the two balance-error "
               "features, old/new balances and `orig_emptied` remain). Treat these scores as an upper bound, not an "

@@ -15,6 +15,7 @@ FALSE_DECLINE_COST_GBP = 10.0               # cost of wrongly declining a genuin
 AB_STRICTER_FACTOR = 0.5                    # treatment rule: decline at half the control score threshold
 AB_MDE = 0.10                               # minimum detectable effect: 10% change in cost per transaction
 AB_ALPHA, AB_POWER = 0.05, 0.80
+AB_GUARDRAIL_FD_RATE = 0.01                # guardrail: a rule may wrongly decline at most 1% of genuine payments
 
 # Data contract for the raw file: PaySim has 6,362,620 transactions. A file with 1,048,575 rows was cut at
 # Excel's row limit (opened and re-saved in a spreadsheet app).

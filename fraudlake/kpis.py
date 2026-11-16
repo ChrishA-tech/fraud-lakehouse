@@ -3,7 +3,7 @@ Analytical SQL (Spark SQL / Databricks SQL). Table names are placeholders filled
 run on Databricks ({gold} = workspace.fraud.gold_transactions) and locally (temporary views).
 
 daily_kpis        daily volume, fraud rate, fraud value; 7-day rolling sums (ROWS window), day-over-day change (LAG),
-                  and which payment type lost most each day (RANK)
+                  and which payment type lost most each day (ROW_NUMBER, ties broken by type)
 dest_cohorts      receiving accounts grouped by the day they first appear; fraud value and active accounts by
                   days since first seen (cohort matrix)
 mule_concentration  receiving accounts ranked by fraud value received; cumulative share (Pareto) and NTILE decile
@@ -21,7 +21,7 @@ WITH d AS (
   FROM {gold} GROUP BY day),
 t AS (
   SELECT day, type, SUM(CASE WHEN is_fraud = 1 THEN amount ELSE 0 END) AS fv,
-         RANK() OVER (PARTITION BY day ORDER BY SUM(CASE WHEN is_fraud = 1 THEN amount ELSE 0 END) DESC) AS r
+         ROW_NUMBER() OVER (PARTITION BY day ORDER BY SUM(CASE WHEN is_fraud = 1 THEN amount ELSE 0 END) DESC, type) AS r
   FROM {gold} GROUP BY day, type)
 SELECT d.day, d.txns, d.fraud_txns, ROUND(d.fraud_txns / d.txns, 6) AS fraud_rate, d.value, d.fraud_value,
        SUM(d.fraud_value) OVER (ORDER BY d.day ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS fraud_value_7d,

@@ -52,6 +52,15 @@ def test_kpi_sql(spark, gold):
     assert (coh.days_since_first_seen >= 0).all()
 
 
+def test_daily_kpis_one_row_per_day_even_with_tied_types(spark):
+    spark.sql("""CREATE OR REPLACE TEMP VIEW tie_gold AS SELECT * FROM VALUES
+                 (1, 'TRANSFER', 100.0D, 1), (1, 'CASH_OUT', 100.0D, 1), (2, 'TRANSFER', 50.0D, 1), (2, 'PAYMENT', 5.0D, 0)
+                 AS t(day, type, amount, is_fraud)""")
+    d = kpis.run(spark, "daily_kpis", gold="tie_gold").toPandas()
+    assert d.day.tolist() == [1, 2] and d.fraud_value_7d.tolist() == [200.0, 250.0]
+    assert d.top_fraud_type.tolist() == ["CASH_OUT", "TRANSFER"]          # tie broken alphabetically
+
+
 def test_model_threshold_shap_and_ab(spark, gold):
     g, _ = gold
     cols = ["txn_id", "step", "day", "type", "amount", "is_fraud", "name_dest"] + sorted(set(model.FEATURE_SETS["full"]) - {"amount"})
@@ -124,3 +133,13 @@ def test_time_split_by_row_share_handles_front_loaded_steps():
     share = out.split.value_counts(normalize=True)
     assert set(share.index) == {"train", "valid", "test"} and share["train"] > 0.6 and share["test"] > 0.08
     assert out.groupby("split").step.max()["train"] < out.groupby("split").step.min()["valid"]   # time-ordered
+
+
+def test_ab_guardrail_rejects_rule_that_declines_genuine_payments():
+    rng = np.random.default_rng(1)
+    n = 20000
+    y = (rng.random(n) < 0.01).astype(int)
+    score = np.where(y == 1, 0.9, rng.uniform(0.3, 0.5, n))       # genuine payments score between the two thresholds
+    r = abtest.simulate([f"t{i}" for i in range(n)], score, y, np.full(n, 5000.0), thr_control=0.6, factor=0.5)
+    assert r["guardrail"]["breached"] and r["decision"].startswith("reject the stricter rule")
+    assert r["treatment"]["false_decline_rate"] > 0.9 and r["control"]["false_decline_rate"] == 0

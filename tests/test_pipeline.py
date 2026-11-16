@@ -111,3 +111,16 @@ def test_run_local_end_to_end(csv_path, tmp_path):
     r = run(csv_path, out=tmp_path, shap_rows=200, log=lambda *a: None)
     assert (tmp_path / "memo.md").exists() and (tmp_path / "fraud_report.xlsx").exists()
     assert json.loads((tmp_path / "results.json").read_text())["model"]["full"]["test"]["pr_auc"] > 0.8
+
+
+def test_time_split_by_row_share_handles_front_loaded_steps():
+    import numpy as np
+    import pandas as pd
+    from fraudlake import model
+    rng = np.random.default_rng(1)
+    step = np.concatenate([rng.integers(1, 400, 9000), rng.integers(400, 744, 300)])   # PaySim-like: dense early
+    df = pd.DataFrame({"step": step, "type": "TRANSFER", "is_fraud": (rng.random(len(step)) < 0.05).astype(int)})
+    out = model.model_frame(df)
+    share = out.split.value_counts(normalize=True)
+    assert set(share.index) == {"train", "valid", "test"} and share["train"] > 0.6 and share["test"] > 0.08
+    assert out.groupby("split").step.max()["train"] < out.groupby("split").step.min()["valid"]   # time-ordered

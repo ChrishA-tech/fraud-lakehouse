@@ -5,7 +5,7 @@
 # COMMAND ----------
 
 # MAGIC %pip install -q xgboost shap openpyxl
-# MAGIC %pip install -q --no-deps /Volumes/workspace/fraud/raw/libs/fraud_lakehouse-0.1.0-py3-none-any.whl
+# MAGIC %pip install -q --no-deps --force-reinstall /Volumes/workspace/fraud/raw/libs/fraud_lakehouse-0.1.0-py3-none-any.whl
 # MAGIC %restart_python
 
 # COMMAND ----------

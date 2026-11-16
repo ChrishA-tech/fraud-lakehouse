@@ -5,7 +5,9 @@ EXPORT_DIR = f"/Volumes/{CATALOG}/{SCHEMA}/exports"
 
 TYPES = ("PAYMENT", "TRANSFER", "CASH_OUT", "DEBIT", "CASH_IN")
 MODEL_TYPES = ("TRANSFER", "CASH_OUT")      # PaySim only contains fraud in these two types
-TRAIN_MAX_STEP, VALID_MAX_STEP = 500, 600   # time split by hour step: train <=500, validate 501-600, test >600
+# Time split by row share, in step (hour) order: earliest 70% train, next 15% validate, latest 15% test.
+# PaySim rows are concentrated in the early steps, so fixed step cut-offs (e.g. 500/600) leave splits empty.
+TRAIN_SHARE, VALID_SHARE = 0.70, 0.15
 SEED = 7
 
 # Business assumptions (illustrative; PaySim amounts are simulated currency units, reported here as GBP)

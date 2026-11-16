@@ -22,8 +22,22 @@ FEATURE_SETS = {"full": BASE + ["error_balance_orig", "error_balance_dest"], "no
 
 def model_frame(gold_pdf: pd.DataFrame) -> pd.DataFrame:
     df = gold_pdf[gold_pdf["type"].isin(C.MODEL_TYPES)].copy()
-    df["split"] = np.where(df["step"] <= C.TRAIN_MAX_STEP, "train", np.where(df["step"] <= C.VALID_MAX_STEP, "valid", "test"))
+    cut_train, cut_valid = split_steps(df["step"])
+    df["split"] = np.where(df["step"] <= cut_train, "train", np.where(df["step"] <= cut_valid, "valid", "test"))
+    for name in ("train", "valid", "test"):
+        part = df[df.split == name]
+        if len(part) == 0 or part.is_fraud.nunique() < 2:
+            raise ValueError(f"split '{name}' has {len(part)} rows and {int(part.is_fraud.sum())} fraud cases "
+                             f"(step cut-offs {cut_train}/{cut_valid}); both classes are needed in every split")
     return df
+
+
+def split_steps(step: pd.Series):
+    """Step cut-offs so that roughly TRAIN_SHARE / VALID_SHARE / rest of rows fall in train / valid / test, in time
+    order (whole steps never straddle two splits, so no future hour leaks into training)."""
+    cut_train = int(step.quantile(C.TRAIN_SHARE))
+    cut_valid = max(int(step.quantile(C.TRAIN_SHARE + C.VALID_SHARE)), cut_train + 1)
+    return cut_train, cut_valid
 
 
 def train(df: pd.DataFrame, features: List[str], seed: int = C.SEED):
@@ -86,6 +100,7 @@ def fit_and_score(gold_pdf: pd.DataFrame, shap_rows: int = 20000, log_mlflow: bo
                   registered_name: Optional[str] = None) -> Dict:
     df = model_frame(gold_pdf)
     results, models = {"split_sizes": df.split.value_counts().to_dict(),
+                       "split_step_cutoffs": dict(zip(("train_max_step", "valid_max_step"), split_steps(df["step"]))),
                        "fraud_by_split": df.groupby("split").is_fraud.sum().astype(int).to_dict()}, {}
     for name, feats in FEATURE_SETS.items():
         m = train(df, feats)

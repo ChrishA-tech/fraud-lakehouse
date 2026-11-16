@@ -25,18 +25,22 @@ flowchart LR
 ## Results
 
 <!-- RESULTS:START -->
-Run 2026-11-16 on Databricks Free Edition; test period = last 3 days (never used for training or threshold choice).
+Run 2026-11-16 on Databricks serverless (trial workspace); test period = last 16 days (never used for training or threshold choice).
+
+Data: 6,362,620 gold rows; 2,770,409 TRANSFER/CASH_OUT rows modelled; time split at step 323 / 377 (train / validation / test = 1,951,895 / 410,437 / 408,077).
 
 | Model (test period) | PR-AUC | Precision | Recall | Fraud value stopped | False declines | Net saving |
 |---|---|---|---|---|---|---|
-| XGBoost, all features | 0.997 | 0.994 | 0.997 | 99.8% | 4 | £870,424,258 |
-| XGBoost, without balance-error artefact | 0.9928 | 0.937 | 0.997 | 99.8% | 43 | £870,423,868 |
+| XGBoost, all features | 0.9995 | 1.000 | 0.999 | 99.6% | 0 | £6,296,153,556 |
+| XGBoost, without balance-error artefact | 0.9936 | 0.915 | 0.994 | 100.0% | 372 | £6,322,778,249 |
 
-**Stricter rule (offline A/B simulation):** mean cost per transaction changed by £-53.7486 (95% CI £-161.2553 to £+0.0054, p = 0.257); 36,340,332 transactions per arm needed for a 10% effect (not met). Decision: no significant difference: keep the current rule.
+**Stricter rule (offline A/B simulation):** mean cost per transaction changed by £-74.8714 (95% CI £-204.7116 to £+9.9025, p = 0.205); 155,797,938 transactions per arm needed for a 10% effect (not met). Decision: no significant difference: keep the current rule.
 
-**Data quality (Lakeflow expectations):** label_binary 131, balances_non_negative 131, step_in_month 131, amount_valid 131, has_account_ids 131, known_type 131.
+PaySim is simulated: balance fields reveal fraud almost perfectly (even without the two balance-error features, old/new balances and `orig_emptied` remain). Treat these scores as an upper bound, not an estimate for real payments; the GBP figures are PaySim amounts relabelled for illustration.
 
-**Top SHAP drivers:** error_balance_orig (1.5226), orig_emptied (0.1268), amount_to_orig_balance (0.1162).
+**Data quality (Lakeflow expectations):** label_binary 249, balances_non_negative 249, step_in_month 249, amount_valid 249, has_account_ids 249, known_type 249.
+
+**Top SHAP drivers:** error_balance_orig (0.186), old_balance_orig (0.0597), amount (0.0304).
 <!-- RESULTS:END -->
 
 Memo: [`results/memo.md`](results/memo.md) · Excel: [`results/fraud_report.xlsx`](results/fraud_report.xlsx) ·

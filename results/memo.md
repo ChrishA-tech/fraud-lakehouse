@@ -4,7 +4,7 @@
 illustration) | **Period scored:** last 16 days, never used in training
 
 ## Recommendation
-Deploy the model at the validated threshold (0.52). No significant difference: keep the current rule.
+Deploy the model at the validated threshold (0.52). Reject the stricter rule: it wrongly declines 100.0% of genuine payments (guardrail 1%).
 
 ## Impact in the test period
 | | Without model | With model |
@@ -23,7 +23,8 @@ Transactions were randomly split between the current threshold (0.52) and a stri
 (95% CI £-205 to £9.90, p = 0.205). The test needed
 155,797,938 transactions per arm to detect a 10% change and
 did NOT have enough. The stricter rule raised
-202,005 false declines against 0.
+202,005 false declines against 0
+(100.0% of genuine payments; guardrail 1%).
 
 ## Caveats
 - PaySim is simulated data. Two balance features nearly separate fraud because of how the simulator books it;

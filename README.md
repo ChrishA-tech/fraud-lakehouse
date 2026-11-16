@@ -34,11 +34,9 @@ Data: 6,362,620 gold rows; 2,770,409 TRANSFER/CASH_OUT rows modelled; time split
 | XGBoost, all features | 0.9995 | 1.000 | 0.999 | 99.6% | 0 | £6,296,153,556 |
 | XGBoost, without balance-error artefact | 0.9936 | 0.915 | 0.994 | 100.0% | 372 | £6,322,778,249 |
 
-**Stricter rule (offline A/B simulation):** mean cost per transaction changed by £-74.8714 (95% CI £-204.7116 to £+9.9025, p = 0.205); 155,797,938 transactions per arm needed for a 10% effect (not met). Decision: no significant difference: keep the current rule.
+**Stricter rule (offline A/B simulation):** mean cost per transaction changed by £-74.8714 (95% CI £-204.7116 to £+9.9025, p = 0.205); 155,797,938 transactions per arm needed for a 10% effect (not met); stricter rule wrongly declined 100.0% of genuine payments (guardrail 1%). Decision: reject the stricter rule: it wrongly declines 100.0% of genuine payments (guardrail 1%).
 
 PaySim is simulated: balance fields reveal fraud almost perfectly (even without the two balance-error features, old/new balances and `orig_emptied` remain). Treat these scores as an upper bound, not an estimate for real payments; the GBP figures are PaySim amounts relabelled for illustration.
-
-**Data quality (Lakeflow expectations):** label_binary 249, balances_non_negative 249, step_in_month 249, amount_valid 249, has_account_ids 249, known_type 249.
 
 **Top SHAP drivers:** error_balance_orig (0.186), old_balance_orig (0.0597), amount (0.0304).
 <!-- RESULTS:END -->

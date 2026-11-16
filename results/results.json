@@ -112,7 +112,8 @@
       "mean_cost_gbp": 84.7736,
       "fraud_value_lost": 17300340.5,
       "false_declines": 0,
-      "alerts": 2012
+      "alerts": 2012,
+      "false_decline_rate": 0.0
     },
     "treatment": {
       "n": 204000,
@@ -120,7 +121,13 @@
       "mean_cost_gbp": 9.9022,
       "fraud_value_lost": 0.0,
       "false_declines": 202005,
-      "alerts": 204000
+      "alerts": 204000,
+      "false_decline_rate": 1.0
+    },
+    "guardrail": {
+      "metric": "false-decline rate on genuine payments",
+      "max": 0.01,
+      "breached": true
     },
     "difference_mean_cost_gbp": -74.8714,
     "relative_change": -0.8832,
@@ -130,20 +137,13 @@
     ],
     "welch_t": -1.266,
     "p_value": 0.205,
-    "decision": "no significant difference: keep the current rule"
+    "decision": "reject the stricter rule: it wrongly declines 100.0% of genuine payments (guardrail 1%)"
   },
   "test_days": 16,
   "model_rows": 2770409,
   "gold_rows": 6362620,
-  "run_at": "2026-11-16T01:13:48+00:00",
+  "run_at": "2026-11-16T01:33:25+00:00",
   "platform": "Databricks serverless (trial workspace)",
-  "expectation_failures": {
-    "label_binary": 249,
-    "balances_non_negative": 249,
-    "step_in_month": 249,
-    "amount_valid": 249,
-    "has_account_ids": 249,
-    "known_type": 249
-  },
+  "expectation_failures": {},
   "data": "PaySim (Kaggle, CC BY-SA 4.0)"
 }

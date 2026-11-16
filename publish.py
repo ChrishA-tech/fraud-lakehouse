@@ -26,8 +26,7 @@ DESC = ("Fraud analytics on Databricks: Lakeflow Delta pipeline, Unity Catalog P
 TOPICS = ["databricks", "delta-lake", "lakehouse", "unity-catalog", "mlflow", "xgboost", "shap", "fraud-detection",
           "ab-testing", "pyspark", "sql"]
 AUTHOR = ["-c", "user.name=Chrish Pep Felix A", "-c", "user.email=chrishpepfelixa@gmail.com"]
-TRAILER = ("\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\n"
-           "Claude-Session: https://claude.ai/code/session_01DVp71MJqKBK4sk34js4Jfb")
+TRAILER = ""
 START, END = "<!-- RESULTS:START -->", "<!-- RESULTS:END -->"
 
 

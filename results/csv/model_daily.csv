@@ -1,0 +1,4 @@
+day,alerts,true_alerts,fraud_value_caught,fraud_value_missed,precision_7d,value_recall_7d
+2,84,80,98845570.24,1598829.2,0.9524,0.9841
+3,310,310,394508860.6,0.0,0.9898,0.9968
+4,252,252,377069867.3,0.0,0.9938,0.9982

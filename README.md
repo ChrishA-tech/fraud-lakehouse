@@ -25,7 +25,18 @@ flowchart LR
 ## Results
 
 <!-- RESULTS:START -->
-Results appear here after the Databricks Job runs (published from its `results_bundle.zip`).
+Run 2026-11-16 on Databricks Free Edition; test period = last 3 days (never used for training or threshold choice).
+
+| Model (test period) | PR-AUC | Precision | Recall | Fraud value stopped | False declines | Net saving |
+|---|---|---|---|---|---|---|
+| XGBoost, all features | 0.997 | 0.994 | 0.997 | 99.8% | 4 | £870,424,258 |
+| XGBoost, without balance-error artefact | 0.9928 | 0.937 | 0.997 | 99.8% | 43 | £870,423,868 |
+
+**Stricter rule (offline A/B simulation):** mean cost per transaction changed by £-53.7486 (95% CI £-161.2553 to £+0.0054, p = 0.257); 36,340,332 transactions per arm needed for a 10% effect (not met). Decision: no significant difference: keep the current rule.
+
+**Data quality (Lakeflow expectations):** label_binary 131, balances_non_negative 131, step_in_month 131, amount_valid 131, has_account_ids 131, known_type 131.
+
+**Top SHAP drivers:** error_balance_orig (1.5226), orig_emptied (0.1268), amount_to_orig_balance (0.1162).
 <!-- RESULTS:END -->
 
 Memo: [`results/memo.md`](results/memo.md) · Excel: [`results/fraud_report.xlsx`](results/fraud_report.xlsx) ·

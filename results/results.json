@@ -1,0 +1,148 @@
+{
+  "model": {
+    "split_sizes": {
+      "train": 323649,
+      "valid": 77197,
+      "test": 59548
+    },
+    "split_step_cutoffs": {
+      "train_max_step": 37,
+      "valid_max_step": 42
+    },
+    "fraud_by_split": {
+      "test": 644,
+      "train": 430,
+      "valid": 68
+    },
+    "full": {
+      "features": [
+        "amount",
+        "old_balance_orig",
+        "new_balance_orig",
+        "old_balance_dest",
+        "new_balance_dest",
+        "hour_of_day",
+        "is_transfer",
+        "dest_txn_count_24h",
+        "dest_amount_24h",
+        "amount_to_orig_balance",
+        "orig_emptied",
+        "error_balance_orig",
+        "error_balance_dest"
+      ],
+      "best_iteration": 30,
+      "test": {
+        "n": 59548,
+        "fraud_cases": 644,
+        "threshold": 0.67,
+        "pr_auc": 0.997,
+        "roc_auc": 0.9987,
+        "precision": 0.9938,
+        "recall": 0.9969,
+        "value_recall": 0.9982,
+        "fraud_value_caught": 870424298.14,
+        "fraud_value_missed": 1598829.2,
+        "false_declines": 4,
+        "alerts": 646,
+        "net_saving_gbp": 870424258.14,
+        "fraud_value_lost_without_model": 872023127.34
+      }
+    },
+    "no_balance_errors": {
+      "features": [
+        "amount",
+        "old_balance_orig",
+        "new_balance_orig",
+        "old_balance_dest",
+        "new_balance_dest",
+        "hour_of_day",
+        "is_transfer",
+        "dest_txn_count_24h",
+        "dest_amount_24h",
+        "amount_to_orig_balance",
+        "orig_emptied"
+      ],
+      "best_iteration": 42,
+      "test": {
+        "n": 59548,
+        "fraud_cases": 644,
+        "threshold": 0.68,
+        "pr_auc": 0.9928,
+        "roc_auc": 0.9988,
+        "precision": 0.9372,
+        "recall": 0.9969,
+        "value_recall": 0.9982,
+        "fraud_value_caught": 870424298.14,
+        "fraud_value_missed": 1598829.2,
+        "false_declines": 43,
+        "alerts": 685,
+        "net_saving_gbp": 870423868.14
+      }
+    },
+    "shap_global_importance": {
+      "error_balance_orig": 1.5226,
+      "orig_emptied": 0.1268,
+      "amount_to_orig_balance": 0.1162,
+      "hour_of_day": 0.1083,
+      "old_balance_dest": 0.0844,
+      "amount": 0.0616,
+      "new_balance_dest": 0.0477,
+      "old_balance_orig": 0.0457,
+      "dest_amount_24h": 0.0364,
+      "dest_txn_count_24h": 0.0197,
+      "error_balance_dest": 0.0114,
+      "is_transfer": 0.0025,
+      "new_balance_orig": 0.0018
+    }
+  },
+  "ab_test": {
+    "design": {
+      "unit": "transaction (stable hash of txn_id)",
+      "metric": "cost per transaction (GBP)",
+      "mde": 0.1,
+      "alpha": 0.05,
+      "power": 0.8,
+      "required_n_per_arm": 36340332,
+      "powered": false,
+      "simulation": true
+    },
+    "control": {
+      "n": 29744,
+      "threshold": 0.67,
+      "mean_cost_gbp": 53.7533,
+      "fraud_value_lost": 1598829.2,
+      "false_declines": 1,
+      "alerts": 307
+    },
+    "treatment": {
+      "n": 29804,
+      "threshold": 0.335,
+      "mean_cost_gbp": 0.0047,
+      "fraud_value_lost": 0.0,
+      "false_declines": 14,
+      "alerts": 350
+    },
+    "difference_mean_cost_gbp": -53.7486,
+    "relative_change": -0.9999,
+    "ci95": [
+      -161.2553,
+      0.0054
+    ],
+    "welch_t": -1.133,
+    "p_value": 0.257,
+    "decision": "no significant difference: keep the current rule"
+  },
+  "test_days": 3,
+  "gold_rows": 460394,
+  "run_at": "2026-11-16T00:31:45+00:00",
+  "platform": "Databricks Free Edition",
+  "expectation_failures": {
+    "label_binary": 131,
+    "balances_non_negative": 131,
+    "step_in_month": 131,
+    "amount_valid": 131,
+    "has_account_ids": 131,
+    "known_type": 131
+  },
+  "data": "PaySim (Kaggle, CC BY-SA 4.0)"
+}

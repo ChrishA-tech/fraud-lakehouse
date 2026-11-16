@@ -7,7 +7,11 @@ name = "fraud-lakehouse"
 version = "0.1.0"
 description = "PaySim fraud analytics on Databricks: Lakeflow Delta pipeline, Unity Catalog governance, analytical SQL, XGBoost + SHAP, MLflow, offline A/B test, Excel/Power Query, business memo."
 requires-python = ">=3.10"
-dependencies = ["pyspark>=3.5", "pandas", "numpy", "scipy", "scikit-learn", "xgboost>=2.0", "shap", "openpyxl", "pyarrow"]
+# No runtime dependencies: Databricks provides Spark/pandas; notebooks pip-install xgboost/shap/openpyxl.
+dependencies = []
+
+[project.optional-dependencies]
+local = ["pyspark>=3.5", "pandas", "numpy", "scipy", "scikit-learn", "xgboost>=2.0", "shap", "openpyxl", "pyarrow"]
 
 [tool.setuptools]
 packages = ["fraudlake"]

@@ -4,11 +4,16 @@
 # MAGIC Creates the `workspace.fraud` schema and two Unity Catalog volumes. Upload the PaySim CSV
 # MAGIC (`PS_20174392719_1491204439457_log.csv`) to the `raw` volume before the pipeline runs:
 # MAGIC **Catalog > workspace > fraud > Volumes > raw > Upload to this volume**.
+# MAGIC
+# MAGIC The `fraudlake` package is installed as a wheel from the `raw` volume (`deploy.sh` puts it there): importing
+# MAGIC modules from bundle-deployed workspace files can fail with `Errno 5 Input/output error` on some workspaces.
 
 # COMMAND ----------
 
-import os, sys
-sys.path.append(os.path.dirname(os.getcwd()))
+# MAGIC %pip install -q --no-deps /Volumes/workspace/fraud/raw/libs/fraud_lakehouse-0.1.0-py3-none-any.whl
+
+# COMMAND ----------
+
 from fraudlake import config as C
 
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS {C.CATALOG}.{C.SCHEMA} COMMENT 'PaySim fraud lakehouse'")

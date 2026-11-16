@@ -7,6 +7,7 @@
 # COMMAND ----------
 
 # MAGIC %pip install -q openpyxl
+# MAGIC %pip install -q --no-deps /Volumes/workspace/fraud/raw/libs/fraud_lakehouse-0.1.0-py3-none-any.whl
 # MAGIC %restart_python
 
 # COMMAND ----------
@@ -14,7 +15,6 @@
 import io, json, os, shutil, sys, tempfile, zipfile
 from datetime import datetime, timezone
 from pathlib import Path
-sys.path.append(os.path.dirname(os.getcwd()))
 from fraudlake import config as C, excel, kpis, memo
 
 S = f"{C.CATALOG}.{C.SCHEMA}"

@@ -22,6 +22,9 @@ resources:
       serverless: true
       channel: CURRENT
       photon: true
+      environment:
+        dependencies:
+          - /Volumes/workspace/fraud/raw/libs/fraud_lakehouse-0.1.0-py3-none-any.whl
       configuration:
         bundle.sourcePath: ${workspace.file_path}
       libraries:

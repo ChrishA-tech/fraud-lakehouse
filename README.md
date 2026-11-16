@@ -55,8 +55,9 @@ and are covered by tests on PaySim-like synthetic data (`pytest`, needs Java).
 3. In the workspace: **Workspace > Create > Git folder**, URL `https://github.com/ChrishA-tech/fraud-lakehouse`.
    Run `notebooks/01_setup` once (creates the schema and volumes), then upload the CSV to
    **Catalog > workspace > fraud > Volumes > raw**.
-4. Create the pipeline and job, either with the CLI (`databricks bundle deploy && databricks bundle run fraud_job`)
-   or in the UI from `databricks.yml`.
+4. Install the Databricks CLI, `databricks auth login --host <workspace-url>`, then `./deploy.sh`: it builds the
+   `fraudlake` wheel, uploads it to the `raw` volume (notebooks and the pipeline install it from there), deploys
+   the bundle and runs the job.
 5. Download `exports/results_bundle.zip` from the volume and run `python3 publish.py` to add the results here.
 
 ## Honest limits
